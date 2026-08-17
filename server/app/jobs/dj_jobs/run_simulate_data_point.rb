@@ -16,12 +16,6 @@ module DjJobs
     MAX_INLINE_RESULTS_BYTES = 5_000_000
     MAX_INLINE_RESULTS_MEASURE_BYTES = 1_000_000
 
-    # Raised (instead of a bare String) when the downloaded analysis.zip cannot be
-    # extracted, so initialize_worker's cleanup can distinguish this deterministic
-    # failure and remove the analysis_dir AFTER write_lock has closed and deleted
-    # the lock file - see the CorruptAnalysisZip rescue in initialize_worker.
-    class CorruptAnalysisZip < StandardError; end
-
     def initialize(data_point_id, options = {})
       @data_point = DataPoint.find(data_point_id)
       @options = options
@@ -207,7 +201,7 @@ module DjJobs
             # check for a valid timeout value
             unless @data_point.analysis.run_workflow_timeout.positive?
               @sim_logger.warn "run_workflow_timeout option: #{@data_point.analysis.run_workflow_timeout} is not valid.  Using 28800s instead."
-              @data_point.analysis.run_workflow_timeout = 28800
+              @@data_point.analysis.run_workflow_timeout = 28800
             end
             Timeout.timeout(@data_point.analysis.run_workflow_timeout) do
               Process.wait(pid)
@@ -419,91 +413,33 @@ module DjJobs
       # add check for a valid timeout value
       unless @data_point.analysis.initialize_worker_timeout.positive?
         @sim_logger.warn "initialize_worker_timeout option: #{@data_point.analysis.initialize_worker_timeout} is not valid.  Using 28800s instead."
-        @data_point.analysis.initialize_worker_timeout = 28800
+        @@data_point.analysis.initialize_worker_timeout = 28800
       end
       # This block makes this code threadsafe for non-docker deployments, i.e. desktop usage
       if File.exist? write_lock_file
         @sim_logger.info 'write_lock_file exists, checking & waiting for receipt file'
 
-        # Wait until receipt file appears, then return or error. Also bail out early if the
-        # lock file itself disappears without a receipt ever showing up: that means the
-        # original holder died (crashed, OOM-killed, evicted, hit a deterministic failure
-        # like a corrupt seed zip) partway through without completing initialization.
-        # Waiting the full initialize_worker_timeout (default 8h) for a receipt that will
-        # never come just wastes a worker slot for no reason.
-        lock_holder_gone = false
-        abandoned_probes = 0
+        # wait until receipt file appears then return or error
         begin
           Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
             loop do
               break if File.exist? receipt_file
 
-              unless File.exist? write_lock_file
-                lock_holder_gone = true
-                break
-              end
-
-              # flock is released by the OS when its holder dies, even on SIGKILL/OOM -
-              # deaths write_lock's own rescue cleanup never sees. A lock file whose flock
-              # is acquirable is abandoned; detect that here instead of waiting out the
-              # full initialize_worker_timeout. Require two consecutive positive probes
-              # (a poll interval apart) so a holder's open->flock startup gap can never
-              # read as abandonment.
-              if lock_abandoned?(write_lock_file)
-                abandoned_probes += 1
-                if abandoned_probes >= 2
-                  @sim_logger.error 'write_lock_file exists but its flock is not held; the original holder died without cleaning up. Clearing the abandoned lock and failing this attempt so it can be retried.'
-                  FileUtils.rm_f write_lock_file
-                  lock_holder_gone = true
-                  break
-                end
-              else
-                abandoned_probes = 0
-              end
-
               @sim_logger.info 'waiting for receipt file to appear'
               sleep 3
             end
           end
-        rescue ::Timeout::Error
-          # Only clear the lock if nothing is actually holding it: a holder that is alive
-          # but slow (each of its download/extract steps gets its own
-          # initialize_worker_timeout, so it can legitimately outlive this single wait)
-          # still owns the file, and deleting it would let a third worker re-create the
-          # lock on a new inode and initialize the same analysis_dir concurrently.
-          if lock_abandoned?(write_lock_file)
-            @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds and the lock is not held; clearing the stale lock so a future worker does not wait on it."
-            FileUtils.rm_f write_lock_file
-          else
-            @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds; the lock holder is still alive, leaving its lock in place."
-          end
-          return false
-        end
 
-        if File.exist? receipt_file
           @sim_logger.info 'receipt_file appeared, moving on'
           return true
-        else
-          @sim_logger.error 'write_lock_file was removed by its holder without a receipt_file appearing; the original holder failed to initialize. Failing this attempt so it can be retried.' if lock_holder_gone
-          return false
+        rescue ::Timeout::Error
+          @sim_logger.error "Required analysis objects were not retrieved after #{@data_point.analysis.initialize_worker_timeout} seconds."
         end
       else
         # Try to download the analysis zip, but first lock simultanious threads
         write_lock(write_lock_file) do |_|
-          # Re-check the receipt now that we hold the lock: a worker that passed the
-          # outer receipt check may acquire the lock only after the init winner
-          # completed and wrote the receipt. Without this, every such worker
-          # re-downloads and re-extracts over content other datapoints are actively
-          # reading (issue #857's N-worker re-download herd).
-          if File.exist?(receipt_file)
-            @sim_logger.info 'receipt_file appeared while waiting for the lock; skipping analysis download/extract'
-            next
-          end
-
           zip_download_count = 0
           zip_max_download_count = 12
-          zip_validation_failures = 0
-          zip_validation_failure_max = 3
           download_file = "#{analysis_dir}/analysis.zip"
           download_url = "#{APP_CONFIG['os_server_host_url']}/analyses/#{@data_point.analysis.id}/download_analysis_zip"
           @sim_logger.info "Downloading analysis zip from #{download_url}"
@@ -511,47 +447,15 @@ module DjJobs
           begin
             Timeout.timeout(@data_point.analysis.initialize_worker_timeout) do
               zip_download_count += 1
-              # Download to a private temp name and validate BEFORE renaming into the
-              # shared path: on multi-node deployments the served bytes can be
-              # truncated or otherwise transiently corrupt (issue #857), and
-              # extracting them used to escalate a transient fetch problem into a
-              # terminal CorruptAnalysisZip failure. The rename is atomic within the
-              # directory, so readers of analysis.zip never observe a partial file;
-              # the pid suffix keeps a concurrent initializer (should locking ever
-              # fail) writing to its own temp file instead of interleaving with ours.
-              download_tmp = "#{download_file}.#{Process.pid}.part"
-              begin
-                File.open(download_tmp, 'wb') do |saved_file|
-                  # the following "open" is provided by open-uri
-                  URI.open(download_url, 'rb') do |read_file|
-                    saved_file.write(read_file.read)
-                  end
+              File.open(download_file, 'wb') do |saved_file|
+                # the following "open" is provided by open-uri
+                URI.open(download_url, 'rb') do |read_file|
+                  saved_file.write(read_file.read)
                 end
-                zip_error = Analysis.seed_zip_error(download_tmp)
-                if zip_error
-                  zip_validation_failures += 1
-                  # A transiently-corrupt transfer heals on retry; a corrupt-at-rest
-                  # zip fails validation identically every time. After
-                  # zip_validation_failure_max consecutive validation failures treat
-                  # the corruption as deterministic and fail terminally (issue #841
-                  # fail-fast semantics), sweeping partial content while still
-                  # holding the lock - same cleanup contract as the extract-stage
-                  # corrupt-zip rescue below.
-                  if zip_validation_failures >= zip_validation_failure_max
-                    FileUtils.rm_rf(Dir.glob("#{analysis_dir}/*") - [write_lock_file])
-                    raise CorruptAnalysisZip, "Analysis zip for datapoint #{@data_point.id} is corrupt and cannot be extracted: downloaded copy failed validation on #{zip_validation_failures} consecutive attempts: #{zip_error}"
-                  end
-                  raise "downloaded analysis zip failed validation (truncated or corrupt transfer): #{zip_error}"
-                end
-
-                FileUtils.mv(download_tmp, download_file)
-              ensure
-                FileUtils.rm_f download_tmp
               end
             end
           rescue StandardError => e
-            raise if e.is_a?(CorruptAnalysisZip)
-
+            FileUtils.rm_f download_file if File.exist? download_file
             sleep Random.new.rand(1.0..10.0)
             retry if zip_download_count < zip_max_download_count
             raise "Could not download the analysis zip after #{zip_max_download_count} attempts. Failed with message #{e.message}."
@@ -569,16 +473,6 @@ module DjJobs
               #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
               extract_archive(download_file, analysis_dir)
             end
-          rescue ::Zip::Error, ::Zlib::Error => e
-            # A corrupt zip is a deterministic failure - retrying cannot succeed (issue #841).
-            # Remove partially extracted files (while still holding the lock) so a later
-            # attempt does not skip-and-reuse them. The lock file itself must survive this
-            # sweep: its fd is still open here, Windows cannot delete an open file, and
-            # FileUtils.rm_rf swallows that failure silently. write_lock's rescue unlocks,
-            # closes, and deletes it on the way out, and initialize_worker's
-            # CorruptAnalysisZip rescue then removes the emptied directory.
-            FileUtils.rm_rf(Dir.glob("#{analysis_dir}/*") - [write_lock_file])
-            raise CorruptAnalysisZip, "Analysis zip for datapoint #{@data_point.id} is corrupt and cannot be extracted: #{e.message}"
           rescue StandardError => e
             retry if extract_count < extract_max_count
             raise "Extraction of the analysis.zip file failed #{extract_max_count} times with error #{e.message}"
@@ -641,20 +535,6 @@ module DjJobs
 
       @sim_logger.info 'Finished worker initialization'
       return true
-    rescue CorruptAnalysisZip => e
-      # write_lock's rescue has already closed and deleted the lock file (the only fd that
-      # was still open under analysis_dir), and the in-lock sweep removed the extracted
-      # content. Dir.rmdir rather than rm_rf: if another worker has already re-locked and
-      # begun re-populating the directory, rmdir fails harmlessly instead of deleting its
-      # in-progress files.
-      begin
-        Dir.rmdir(analysis_dir)
-      rescue SystemCallError
-        @sim_logger.warn "Could not remove #{analysis_dir} after corrupt-zip cleanup; leaving it for the next worker."
-      end
-      @sim_logger.error "Error in initialize_worker in #{__FILE__} with message #{e.message}; #{e.backtrace.join("\n")}"
-      @intialize_worker_errs << "#{e.message}; #{e.backtrace.first}"
-      return false
     rescue StandardError => e
       @sim_logger.error "Error in initialize_worker in #{__FILE__} with message #{e.message}; #{e.backtrace.join("\n")}"
       @intialize_worker_errs << "#{e.message}; #{e.backtrace.first}"
@@ -662,39 +542,6 @@ module DjJobs
     end
 
     # Simple method to write a lock file in order for competing threads to wait before continuing.
-    # True when the lock file exists but no process holds its flock - i.e. the
-    # holder died (SIGKILL/OOM/eviction) without running write_lock's cleanup.
-    # The probe takes and immediately releases the flock; a live holder keeps
-    # LOCK_EX for its whole critical section, so LOCK_NB fails against it.
-    def lock_abandoned?(lock_file_path)
-      File.open(lock_file_path, 'r') do |f|
-        # LOCK_SH, not LOCK_EX: over NFSv4 flock is emulated with byte-range locks,
-        # and an exclusive (write) probe on a fd opened read-only raises
-        # Errno::EBADF - so on the k8s/NFS deployments this probe crashed every
-        # waiter (issue #857). A shared probe is grantable on a read-only fd on
-        # every filesystem and is still blocked by a live holder's LOCK_EX, which
-        # is all the probe needs to distinguish held from abandoned.
-        if f.flock(File::LOCK_SH | File::LOCK_NB)
-          f.flock(File::LOCK_UN)
-          true
-        else
-          false
-        end
-      end
-    rescue Errno::ENOENT
-      # Deleted between our existence check and the open: holder is gone.
-      true
-    rescue SystemCallError => e
-      # The probe itself failed (EBADF/ENOLCK/EIO on exotic network filesystems):
-      # abandonment cannot be determined, and the only safe reading is "held".
-      # Treating an indeterminate probe as abandoned deletes a LIVE holder's lock
-      # file, which lets the next worker re-create the lock on a new inode and
-      # initialize the same analysis_dir concurrently - the very corruption this
-      # probe exists to prevent.
-      @sim_logger&.warn "lock_abandoned? probe failed with #{e.class}: #{e.message}; treating lock as held"
-      false
-    end
-
     def write_lock(lock_file_path)
       lock_file = File.open(lock_file_path, 'a')
       begin
@@ -702,22 +549,8 @@ module DjJobs
         lock_file << Time.now
 
         yield
-      rescue StandardError
-        # The protected block failed before a receipt file could be written. Delete the lock
-        # file (not just release the flock) so a future attempt does not see a stale lock and
-        # wait up to initialize_worker_timeout (default 8h) for a receipt that will never come.
-        # Unlock and close BEFORE deleting: Windows (the desktop/PAT deployment this lock
-        # exists for) cannot unlink an open file, and FileUtils.rm_f swallows that failure
-        # silently, leaving the stale lock - and the deadlock - in place.
-        lock_file.flock(File::LOCK_UN)
-        lock_file.close
-        FileUtils.rm_f lock_file_path
-        raise
       ensure
-        unless lock_file.closed?
-          lock_file.flock(File::LOCK_UN)
-          lock_file.close
-        end
+        lock_file.flock(File::LOCK_UN)
       end
     end
 
@@ -763,24 +596,17 @@ module DjJobs
     # This is local function for workaround until that is resolved
     #OpenStudio::Workflow.extract_archive(download_file, analysis_dir)
     def extract_archive(archive_filename, destination, overwrite = true)
-      # Zip::File.new, NOT the Zip::File.open block form: open's implicit close calls
-      # commit, which REWRITES the archive in place (temp file + rename over the
-      # original) whenever the in-memory entry order differs from the stored order -
-      # which ::Zip.sort_entries = true guaranteed for any unsorted zip. On the shared
-      # analysis dir that rewrite races other workers downloading/extracting the same
-      # analysis.zip and corrupts it (issue #857). Sorting is irrelevant to extraction,
-      # and the global flag would poison every other Zip::File.open in this process.
-      zf = ::Zip::File.new(archive_filename)
-      zf.each do |f|
-        @sim_logger.info "Zip: Extracting #{f.name}"
-        f_path = File.join(destination, f.name)
-        FileUtils.mkdir_p(File.dirname(f_path))
-        if File.exist?(f_path) && !overwrite
-          @sim_logger.warn "SKIPPED: #{f.name}, already existed."
-        else
-          # the block authorizes replacing an existing file - without it rubyzip
-          # raises Zip::DestinationFileExistsError instead of overwriting (issue #858)
-          zf.extract(f, f_path) { true }
+      ::Zip.sort_entries = true
+      Zip::File.open(archive_filename) do |zf|
+        zf.each do |f|
+          @sim_logger.info "Zip: Extracting #{f.name}"
+          f_path = File.join(destination, f.name)
+          FileUtils.mkdir_p(File.dirname(f_path))
+          if File.exist?(f_path)
+            @sim_logger.warn "SKIPPED: #{f.name}, already existed."
+          else
+            zf.extract(f, f_path)
+          end
         end
       end
     end
@@ -796,7 +622,7 @@ module DjJobs
       # add check for a valid timeout value
       unless @data_point.analysis.upload_results_timeout.positive?
         @sim_logger.warn "upload_results_timeout option: #{@data_point.analysis.upload_results_timeout} is not valid.  Using 28800s instead."
-        @data_point.analysis.upload_results_timeout = 28800
+        @@data_point.analysis.upload_results_timeout = 28800
       end
       begin
         Timeout.timeout(@data_point.analysis.upload_results_timeout) do
