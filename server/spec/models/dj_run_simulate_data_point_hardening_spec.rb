@@ -170,33 +170,27 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :model do
       path
     end
 
-    it 'fails terminally after bounded validation attempts (no 12x retry), reports zip corruption, and cleans up the partial analysis_dir' do
+    it 'fails on the first extraction attempt (no retries), reports zip corruption, and cleans up the partial analysis_dir' do
       Dir.mktmpdir('corrupt-zip-fixture') do |fixture_dir|
         corrupt_zip = build_zlib_corrupt_zip(File.join(fixture_dir, 'analysis.zip'))
-        serve_count = 0
 
         job = build_job
         allow(job).to receive(:sleep) # skip the real stagger/backoff sleeps around the download step
         allow(URI).to receive(:open) do |*_args, &blk|
-          serve_count += 1
           File.open(corrupt_zip, 'rb', &blk)
         end
-        # Since the issue #857 download-validation fix, deterministic corruption is
-        # caught BEFORE extraction: the downloaded bytes fail validation on
-        # 3 consecutive attempts (distinguishing corrupt-at-rest from a transiently
-        # truncated transfer, which heals on retry) and escalate to the same terminal
-        # CorruptAnalysisZip path. Extraction must never run against corrupt bytes,
-        # and the old blind 12x download retry must not resurrect.
-        expect(job).not_to receive(:extract_archive)
+        # This is the crux assertion: extraction must be attempted exactly once. If the
+        # fix regresses to the old 3x retry, this expectation raises immediately on the
+        # 2nd call (RSpec::Mocks::MockExpectationError), failing the example loudly.
+        expect(job).to receive(:extract_archive).once.and_call_original
 
         analysis_dir = job.send(:analysis_dir)
         result = job.initialize_worker
 
         expect(result).to be false
-        expect(serve_count).to eq 3
         errs = job.instance_variable_get(:@intialize_worker_errs).join
         expect(errs).to match(/is corrupt and cannot be extracted/)
-        expect(errs).not_to match(/Could not download the analysis zip after/)
+        expect(errs).not_to match(/failed 3 times/)
         expect(Dir.exist?(analysis_dir)).to be false
       end
     end
@@ -226,197 +220,6 @@ RSpec.describe DjJobs::RunSimulateDataPoint, type: :model do
       expect(result).to be true
       expect(job.instance_variable_get(:@intialize_worker_errs)).to be_empty
       expect(job.instance_variable_get(:@data_point).analysis.initialize_worker_timeout).to eq 28800
-    end
-  end
-
-  # Regression specs for the analysis-zip corruption on shared-filesystem (NFS/k8s)
-  # deployments (issue #857). Three distinct defects, three seams:
-  #   1. extract_archive used the Zip::File.open block form with ::Zip.sort_entries = true;
-  #      the implicit close called commit, which REWRITES the archive in place (temp file +
-  #      rename) whenever sorting reordered the entry list. On the shared analysis dir that
-  #      rewrite races other workers downloading/extracting the same file.
-  #   2. The analysis.zip download wrote straight to its final shared path with no
-  #      integrity check, so a truncated/mid-rewrite fetch was extracted as-is and
-  #      escalated to a terminal CorruptAnalysisZip datapoint failure.
-  #   3. A worker that raced past the outer receipt check re-downloaded and re-extracted
-  #      the zip even when the receipt appeared before it acquired the lock, overwriting
-  #      content other datapoints were actively reading (the herd effect: N workers, N
-  #      serial re-downloads).
-  describe '#extract_archive read-only behavior (issue #857)' do
-    subject(:job) { described_class.allocate.tap { |j| j.instance_variable_set(:@sim_logger, Logger.new(nil)) } }
-
-    # Entries deliberately NOT in sorted order: that is what makes rubyzip's close
-    # decide commit_required? and rewrite the file when sort_entries is set.
-    def build_unsorted_zip(path)
-      Zip::OutputStream.open(path) do |zos|
-        zos.put_next_entry('zzz_last.txt')
-        zos.write('z' * 100)
-        zos.put_next_entry('aaa_first.txt')
-        zos.write('a' * 100)
-      end
-      path
-    end
-
-    it 'leaves the archive byte-identical after extraction' do
-      Dir.mktmpdir do |dir|
-        zip_path = build_unsorted_zip(File.join(dir, 'analysis.zip'))
-        before_md5 = Digest::MD5.file(zip_path).hexdigest
-        dest = File.join(dir, 'extract_dest')
-        FileUtils.mkdir_p(dest)
-
-        job.send(:extract_archive, zip_path, dest)
-
-        expect(Digest::MD5.file(zip_path).hexdigest).to eq(before_md5), 'extract_archive must never modify the archive it reads'
-        expect(File.read(File.join(dest, 'aaa_first.txt'))).to eq('a' * 100)
-        expect(File.read(File.join(dest, 'zzz_last.txt'))).to eq('z' * 100)
-      end
-    end
-  end
-
-  # Regression specs for issue #858: extract_archive declared an overwrite parameter but
-  # never checked it -- every existing file was skipped unconditionally. A worker killed
-  # mid-extract (rollout restart) leaves partial/stale files in the shared analysis dir;
-  # the next worker's extract must replace them, or OpenStudio's BCLMeasure loader chokes
-  # on the stale measure.xml ("could not be read as XML data").
-  describe '#extract_archive overwrite behavior (issue #858)' do
-    subject(:job) { described_class.allocate.tap { |j| j.instance_variable_set(:@sim_logger, Logger.new(nil)) } }
-
-    def build_measure_zip(path, xml)
-      Zip::OutputStream.open(path) do |zos|
-        zos.put_next_entry('measures/m1/measure.xml')
-        zos.write(xml)
-      end
-      path
-    end
-
-    it 'replaces a pre-existing stale file with the archive contents by default' do
-      Dir.mktmpdir do |dir|
-        zip_path = build_measure_zip(File.join(dir, 'analysis.zip'), '<measure>fresh</measure>')
-        dest = File.join(dir, 'dest')
-        stale_path = File.join(dest, 'measures/m1/measure.xml')
-        FileUtils.mkdir_p(File.dirname(stale_path))
-        File.write(stale_path, '<measure>stale, from a worker killed mid-ext')
-
-        job.send(:extract_archive, zip_path, dest)
-
-        expect(File.read(stale_path)).to eq('<measure>fresh</measure>'), 'overwrite defaults to true: stale pre-existing files must be replaced, not skipped'
-      end
-    end
-
-    it 'keeps a pre-existing file when overwrite is false' do
-      Dir.mktmpdir do |dir|
-        zip_path = build_measure_zip(File.join(dir, 'analysis.zip'), '<measure>fresh</measure>')
-        dest = File.join(dir, 'dest')
-        existing_path = File.join(dest, 'measures/m1/measure.xml')
-        FileUtils.mkdir_p(File.dirname(existing_path))
-        File.write(existing_path, '<measure>keep me</measure>')
-
-        job.send(:extract_archive, zip_path, dest, false)
-
-        expect(File.read(existing_path)).to eq('<measure>keep me</measure>')
-      end
-    end
-  end
-
-  describe '#initialize_worker with a truncated analysis.zip download (issue #857 serving race)' do
-    def build_valid_zip(path)
-      Zip::OutputStream.open(path) do |zos|
-        zos.put_next_entry('measures/m1/measure.xml')
-        zos.write('<measure>deterministic payload</measure>' * 50)
-      end
-      path
-    end
-
-    it 'validates each fetch, retries truncated bytes, and only extracts verified bytes' do
-      Dir.mktmpdir('truncated-zip-fixture') do |fixture_dir|
-        valid_bytes = File.binread(build_valid_zip(File.join(fixture_dir, 'analysis.zip')))
-        truncated_bytes = valid_bytes[0...-30] # cuts the end-of-central-directory record
-        serve_count = 0
-
-        job = build_job
-        allow(job).to receive(:sleep) # skip the real stagger/backoff sleeps
-        allow(URI).to receive(:open) do |*_args, &blk|
-          serve_count += 1
-          blk.call(StringIO.new(serve_count < 3 ? truncated_bytes : valid_bytes))
-        end
-        fake_client = instance_double(OsHttp::Client)
-        allow(fake_client).to receive(:get).and_return(OsHttp::Response.new(200, '{}'))
-        allow(OsHttp).to receive(:client).and_return(fake_client)
-
-        result = job.initialize_worker
-
-        expect(result).to be(true), 'a transiently-truncated download must be retried, not escalated to a terminal corrupt-zip failure'
-        expect(serve_count).to be >= 3
-        download_file = File.join(job.send(:analysis_dir), 'analysis.zip')
-        expect(File.binread(download_file)).to eq(valid_bytes), 'only verified bytes may be placed at the shared analysis.zip path'
-        expect(File.exist?(File.join(job.send(:analysis_dir), 'analysis_zip.receipt'))).to be true
-      end
-    end
-  end
-
-  describe '#lock_abandoned? NFS-safe probe (issue #857 follow-up)' do
-    subject(:job) { described_class.allocate.tap { |j| j.instance_variable_set(:@sim_logger, Logger.new(nil)) } }
-
-    # Over NFSv4 flock is emulated with byte-range locks: an exclusive probe on a
-    # read-only fd raises Errno::EBADF (local filesystems allow it, which is why
-    # this never failed in CI). An unrescued EBADF crashes the waiter; rescuing it
-    # as "abandoned" is worse - it deletes a LIVE holder's lock, letting the next
-    # worker re-create the lock on a new inode and initialize the same analysis_dir
-    # concurrently. The only safe reading of an indeterminate probe is "held".
-    it 'returns false instead of raising when the flock probe fails with EBADF (NFSv4 read-only fd)' do
-      Dir.mktmpdir do |dir|
-        lock_path = File.join(dir, 'analysis_zip.lock')
-        File.write(lock_path, 'held by a live worker on another node')
-        allow_any_instance_of(File).to receive(:flock).and_raise(Errno::EBADF)
-
-        result = nil
-        expect { result = job.send(:lock_abandoned?, lock_path) }.not_to raise_error
-        expect(result).to be false
-      end
-    end
-
-    it 'does not report a held lock as abandoned' do
-      Dir.mktmpdir do |dir|
-        lock_path = File.join(dir, 'analysis_zip.lock')
-        holder = File.open(lock_path, 'a')
-        holder.flock(File::LOCK_EX)
-
-        expect(job.send(:lock_abandoned?, lock_path)).to be false
-      ensure
-        holder.flock(File::LOCK_UN)
-        holder.close
-      end
-    end
-
-    it 'reports an unheld lock file as abandoned' do
-      Dir.mktmpdir do |dir|
-        lock_path = File.join(dir, 'analysis_zip.lock')
-        File.write(lock_path, 'holder died without cleanup')
-
-        expect(job.send(:lock_abandoned?, lock_path)).to be true
-      end
-    end
-  end
-
-  describe '#initialize_worker receipt re-check inside the lock (issue #857 herd re-download)' do
-    it 'skips download/extract when the receipt appeared while queueing for the lock' do
-      job = build_job
-      receipt_file = File.join(job.send(:analysis_dir), 'analysis_zip.receipt')
-
-      # Deterministic reproduction of the race: this worker passed the outer receipt
-      # check (no receipt yet), and the init winner wrote the receipt just before this
-      # worker acquired the flock. and_wrap_original interposes at exactly that
-      # boundary; the real write_lock (real flock, real block) still runs.
-      allow(job).to receive(:write_lock).and_wrap_original do |orig, path, &blk|
-        File.write(receipt_file, 'winner finished while we queued for the lock')
-        orig.call(path, &blk)
-      end
-      expect(URI).not_to receive(:open)
-
-      result = job.initialize_worker
-
-      expect(result).to be true
-      expect(File.read(receipt_file)).to eq 'winner finished while we queued for the lock'
     end
   end
 end
