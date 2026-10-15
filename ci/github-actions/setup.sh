@@ -20,11 +20,13 @@ else
             arm64)
                 RUBY_TARBALL="ruby-3.2.2-darwin-arm64.tar.gz"
                 MONGO_ARCHIVE="mongodb-macos-arm64-8.0.12"
+                MONGO_EXTRACT_DIR="mongodb-macos-aarch64-8.0.12"
                 OS_ARCH="arm64"
                 ;;
             x86_64)
                 RUBY_TARBALL="ruby-3.2.2-darwin.tar.gz"
                 MONGO_ARCHIVE="mongodb-macos-x86_64-8.0.12"
+                MONGO_EXTRACT_DIR="mongodb-macos-x86_64-8.0.12"
                 OS_ARCH="x86_64"
                 ;;
             *)
@@ -50,22 +52,23 @@ else
         otool -L /usr/local/ruby/bin/ruby
         rm "${RUBY_TARBALL}"
 
-        if [ "${ARCH}" == "arm64" ]; then
-            # Ensure static archives and headers for gmp, libyaml, and openssl@3 are staged in
-            # /usr/local/ruby so native gem extensions (psych, puma, etc.) link statically
-            # without embedding non-portable /opt/homebrew dylib paths.
-            for pkg in gmp libyaml openssl@3; do
-                brew list "${pkg}" &>/dev/null || brew install "${pkg}"
-                pkg_prefix=$(brew --prefix "${pkg}")
-                cp -f "${pkg_prefix}"/lib/*.a /usr/local/ruby/lib/
-                cp -Rf "${pkg_prefix}"/include/* /usr/local/ruby/include/
-            done
+        # Ensure static archives and headers for gmp, libyaml, and openssl@3 are staged in
+        # /usr/local/ruby so native gem extensions (psych, puma, etc.) link statically
+        # without embedding non-portable /opt/homebrew or /usr/local/opt dylib paths.
+        for pkg in gmp libyaml openssl@3; do
+            brew list "${pkg}" &>/dev/null || brew install "${pkg}"
+            pkg_prefix=$(brew --prefix "${pkg}")
+            cp -f "${pkg_prefix}"/lib/*.a /usr/local/ruby/lib/
+            cp -Rf "${pkg_prefix}"/include/* /usr/local/ruby/include/
+        done
 
-            # Replace extinit.o and encinit.o in libruby.3.2-static.a with dummy Init_ext/Init_enc
-            # so mkmf try_link0 checks against -lruby.3.2-static succeed without undefined symbols.
+        # Replace extinit.o and encinit.o in libruby.3.2-static.a (present on arm64) with dummy
+        # Init_ext/Init_enc so mkmf try_link0 checks against -lruby.3.2-static succeed without
+        # undefined symbols.
+        if ar -t /usr/local/ruby/lib/libruby.3.2-static.a | grep -Eq '^(extinit|encinit)\.o$'; then
             dmyext_dir=$(mktemp -d)
             printf 'void Init_ext(void) {}\nvoid Init_enc(void) {}\n' > "${dmyext_dir}/dmyext.c"
-            clang -c -arch arm64 "${dmyext_dir}/dmyext.c" -o "${dmyext_dir}/dmyext.o"
+            clang -c -arch "${OS_ARCH}" "${dmyext_dir}/dmyext.c" -o "${dmyext_dir}/dmyext.o"
             ar -d /usr/local/ruby/lib/libruby.3.2-static.a extinit.o encinit.o
             ar -r /usr/local/ruby/lib/libruby.3.2-static.a "${dmyext_dir}/dmyext.o"
             ranlib /usr/local/ruby/lib/libruby.3.2-static.a
@@ -74,41 +77,44 @@ else
                 echo "Error: extinit.o/encinit.o still present in libruby.3.2-static.a" >&2
                 exit 1
             fi
-
-            # Sanitize Conan build-runner paths in rbconfig.rb and disable pkg-config lookups
-            # in mkmf so native extensions only link against /usr/local/ruby/lib static archives.
-            /usr/local/ruby/bin/ruby -e '
-              rbconfig = "/usr/local/ruby/lib/ruby/3.2.0/arm64-darwin23/rbconfig.rb"
-              content = File.read(rbconfig)
-              replaced = content.gsub!(/\/Users\/runner\/work\/conan-recipes\/conan-recipes\/conan-cache\/\.conan2\/p(?:\/b)?\/[^\/\s\x27":]+\/p/, "/usr/local/ruby")
-              raise "Expected Conan paths in #{rbconfig}" unless replaced
-              raise "Remaining Conan paths in #{rbconfig}" if content.include?(".conan2")
-              unless content.include?("--without-pkg-config")
-                patched_args = content.sub!("CONFIG[\"configure_args\"] = \" ", "CONFIG[\"configure_args\"] = \" \x27--without-pkg-config\x27 ")
-                raise "Failed to inject --without-pkg-config into #{rbconfig}" unless patched_args
-              end
-              File.write(rbconfig, content)
-
-              rubygems = "/usr/local/ruby/lib/ruby/3.2.0/rubygems.rb"
-              rg_content = File.read(rubygems)
-              {
-                "require \x27rubygems/dependency_list\x27" => "autoload :DependencyList, \x27rubygems/dependency_list\x27",
-                "require \x27rubygems/installer\x27" => "autoload :Installer, \x27rubygems/installer\x27",
-                "require \x27rubygems/util/licenses\x27" => "autoload :Licenses, \x27rubygems/util/licenses\x27",
-                "require \x27rubygems/name_tuple\x27" => "autoload :NameTuple, \x27rubygems/name_tuple\x27",
-                "require \x27rubygems/request_set\x27" => "autoload :RequestSet, \x27rubygems/request_set\x27",
-                "require \x27rubygems/resolver\x27" => "autoload :Resolver, \x27rubygems/resolver\x27",
-                "require \x27rubygems/source\x27" => "autoload :Source, \x27rubygems/source\x27",
-                "require \x27rubygems/source_list\x27" => "autoload :SourceList, \x27rubygems/source_list\x27",
-                "require \x27rubygems/spec_fetcher\x27" => "autoload :SpecFetcher, \x27rubygems/spec_fetcher\x27"
-              }.each do |old_line, new_line|
-                unless rg_content.include?(new_line)
-                  raise "Failed to restore #{new_line} in #{rubygems}" unless rg_content.sub!(old_line, new_line)
-                end
-              end
-              File.write(rubygems, rg_content)
-            '
         fi
+
+        # Sanitize Conan/Homebrew build-runner paths in rbconfig.rb and disable pkg-config lookups
+        # in mkmf so native extensions only link against /usr/local/ruby/lib static archives.
+        /usr/local/ruby/bin/ruby -e '
+          rbconfig = Dir.glob("/usr/local/ruby/lib/ruby/3.2.0/*-darwin*/rbconfig.rb").first
+          raise "Could not find rbconfig.rb under /usr/local/ruby" unless rbconfig
+          content = File.read(rbconfig)
+          replaced_conan = content.gsub!(/\/Users\/runner\/work\/conan-recipes\/conan-recipes\/conan-cache\/\.conan2\/p(?:\/b)?\/[^\/\s\x27":]+\/p/, "/usr/local/ruby")
+          replaced_brew = content.gsub!(/\/usr\/local\/opt\/(?:openssl@3|libyaml|gmp)/, "/usr/local/ruby")
+          raise "Expected Conan or Homebrew paths in #{rbconfig}" unless replaced_conan || replaced_brew
+          raise "Remaining Conan paths in #{rbconfig}" if content.include?(".conan2")
+          raise "Remaining Homebrew opt paths in #{rbconfig}" if content.match?(/\/usr\/local\/opt\/(?:openssl@3|libyaml|gmp)/)
+          unless content.include?("--without-pkg-config")
+            patched_args = content.sub!("CONFIG[\"configure_args\"] = \" ", "CONFIG[\"configure_args\"] = \" \x27--without-pkg-config\x27 ")
+            raise "Failed to inject --without-pkg-config into #{rbconfig}" unless patched_args
+          end
+          File.write(rbconfig, content)
+
+          rubygems = "/usr/local/ruby/lib/ruby/3.2.0/rubygems.rb"
+          rg_content = File.read(rubygems)
+          {
+            "require \x27rubygems/dependency_list\x27" => "autoload :DependencyList, \x27rubygems/dependency_list\x27",
+            "require \x27rubygems/installer\x27" => "autoload :Installer, \x27rubygems/installer\x27",
+            "require \x27rubygems/util/licenses\x27" => "autoload :Licenses, \x27rubygems/util/licenses\x27",
+            "require \x27rubygems/name_tuple\x27" => "autoload :NameTuple, \x27rubygems/name_tuple\x27",
+            "require \x27rubygems/request_set\x27" => "autoload :RequestSet, \x27rubygems/request_set\x27",
+            "require \x27rubygems/resolver\x27" => "autoload :Resolver, \x27rubygems/resolver\x27",
+            "require \x27rubygems/source\x27" => "autoload :Source, \x27rubygems/source\x27",
+            "require \x27rubygems/source_list\x27" => "autoload :SourceList, \x27rubygems/source_list\x27",
+            "require \x27rubygems/spec_fetcher\x27" => "autoload :SpecFetcher, \x27rubygems/spec_fetcher\x27"
+          }.each do |old_line, new_line|
+            unless rg_content.include?(new_line)
+              raise "Failed to restore #{new_line} in #{rubygems}" unless rg_content.sub!(old_line, new_line)
+            end
+          end
+          File.write(rubygems, rg_content)
+        '
 
         # Install mongodb from a download. Brew is hanging and requires building mongo. This also speeds up the builds.
         curl -SLO "https://fastdl.mongodb.org/osx/${MONGO_ARCHIVE}.tgz"
@@ -119,7 +125,7 @@ else
          exit $exit_status_tar
         fi
         sudo mkdir -p /usr/local/bin
-        sudo cp "${MONGO_ARCHIVE}"/bin/* /usr/local/bin/
+        sudo cp "${MONGO_EXTRACT_DIR}"/bin/* /usr/local/bin/
         rm -r mongodb-macos*
 
         # Install openstudio -- Use the install script that is in this repo now, the one on OpenStudio/develop has changed

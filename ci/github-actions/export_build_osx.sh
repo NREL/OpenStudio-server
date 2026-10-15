@@ -86,7 +86,7 @@ while IFS= read -r bfile; do
         echo "FAIL: Wrong architecture for ${bfile}: ${file_info}" >&2
         exit 1
     fi
-    bad_load=$(otool -L "${bfile}" | tail -n +2 | awk '{print $1}' | grep -E '^(/opt/homebrew|/usr/local/Cellar|/usr/local/opt|/Users/|/private/)' || true)
+    bad_load=$(otool -L "${bfile}" | tail -n +2 | awk '{print $1}' | grep -E '^(/opt/homebrew|/usr/local/|/Users/|/private/)' || true)
     if [ -n "${bad_load}" ]; then
         echo "FAIL: Non-portable dylib reference in ${bfile}: ${bad_load}" >&2
         exit 1
