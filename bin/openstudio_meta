@@ -393,6 +393,8 @@ class InstallGems
       puts "Copying files from '#{src}' to '#{dest}'" if options[:debug]
       Dir.glob(src + '/*').each do |f|
         next if /\.git/ =~ f
+        next if File.basename(f) == 'build'
+        next if f.end_with?('.tar.gz', '.tgz')
         puts "Copying files from '#{f}' to '#{dest}/.'" if options[:debug]
         FileUtils.cp_r(f, dest + '/.')
       end
@@ -410,7 +412,7 @@ class InstallGems
       Dir.glob(dest + '/**/OpenStudio-workflow*/test/').each {|p| FileUtils.rm_rf(p)}
       platform = 'win32'
       if /darwin/.match(RUBY_PLATFORM)
-        platform = 'darwin'
+        platform = /arm64|aarch64/.match(RUBY_PLATFORM) ? 'darwin-arm64' : 'darwin'
       elsif /linux/.match(RUBY_PLATFORM)
         platform = 'linux'
       end
@@ -421,6 +423,7 @@ class InstallGems
       server_sha = `git -C \"#{src}\" rev-parse --short=10 HEAD`.strip
       puts "Server SHA = #{server_sha}" if options[:debug]
 
+      ENV['COPYFILE_DISABLE'] = '1' if /darwin/.match(RUBY_PLATFORM)
       sys_call = "tar -czf OpenStudio-server-#{server_sha}-#{platform}.tar.gz OpenStudio-server"
       puts "Creating tar.gz in #{options[:export_dir]}"
       puts sys_call if options[:debug]
