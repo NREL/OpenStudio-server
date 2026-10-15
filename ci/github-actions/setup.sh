@@ -99,17 +99,17 @@ else
           rubygems = "/usr/local/ruby/lib/ruby/3.2.0/rubygems.rb"
           rg_content = File.read(rubygems)
           {
-            "require \x27rubygems/dependency_list\x27" => "autoload :DependencyList, \x27rubygems/dependency_list\x27",
-            "require \x27rubygems/installer\x27" => "autoload :Installer, \x27rubygems/installer\x27",
-            "require \x27rubygems/util/licenses\x27" => "autoload :Licenses, \x27rubygems/util/licenses\x27",
-            "require \x27rubygems/name_tuple\x27" => "autoload :NameTuple, \x27rubygems/name_tuple\x27",
-            "require \x27rubygems/request_set\x27" => "autoload :RequestSet, \x27rubygems/request_set\x27",
-            "require \x27rubygems/resolver\x27" => "autoload :Resolver, \x27rubygems/resolver\x27",
-            "require \x27rubygems/source\x27" => "autoload :Source, \x27rubygems/source\x27",
-            "require \x27rubygems/source_list\x27" => "autoload :SourceList, \x27rubygems/source_list\x27",
-            "require \x27rubygems/spec_fetcher\x27" => "autoload :SpecFetcher, \x27rubygems/spec_fetcher\x27"
+            "require \x27rubygems/dependency_list\x27" => "autoload :DependencyList, File.expand_path(\"rubygems/dependency_list\", __dir__)",
+            "require \x27rubygems/installer\x27" => "autoload :Installer, File.expand_path(\"rubygems/installer\", __dir__)",
+            "require \x27rubygems/util/licenses\x27" => "autoload :Licenses, File.expand_path(\"rubygems/util/licenses\", __dir__)",
+            "require \x27rubygems/name_tuple\x27" => "autoload :NameTuple, File.expand_path(\"rubygems/name_tuple\", __dir__)",
+            "require \x27rubygems/request_set\x27" => "autoload :RequestSet, File.expand_path(\"rubygems/request_set\", __dir__)",
+            "require \x27rubygems/resolver\x27" => "autoload :Resolver, File.expand_path(\"rubygems/resolver\", __dir__)",
+            "require \x27rubygems/source\x27" => "autoload :Source, File.expand_path(\"rubygems/source\", __dir__)",
+            "require \x27rubygems/source_list\x27" => "autoload :SourceList, File.expand_path(\"rubygems/source_list\", __dir__)",
+            "require \x27rubygems/spec_fetcher\x27" => "autoload :SpecFetcher, File.expand_path(\"rubygems/spec_fetcher\", __dir__)"
           }.each do |old_line, new_line|
-            unless rg_content.include?(new_line)
+            if rg_content.include?(old_line)
               raise "Failed to restore #{new_line} in #{rubygems}" unless rg_content.sub!(old_line, new_line)
             end
           end
