@@ -98,6 +98,41 @@ jobs:
       with:
         name: openstudio-server-gems-darwin
         path: build/NREL/export/*.tar.gz
+  macos-arm64-test:
+    runs-on: macos-15
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+    - name: setup
+      shell: bash
+      run: ./ci/github-actions/setup.sh
+      env:
+        BUILD_TYPE: test
+    - name: unit-test
+      shell: bash
+      run: ./ci/github-actions/test.sh
+      env:
+        BUILD_TYPE: test
+    - name: integration
+      shell: bash
+      run: ./ci/github-actions/test.sh
+      env:
+        BUILD_TYPE: integration
+        SKIP_URBANOPT_ALGO: true # Set this when excluding urbanopt-cli gem from server.
+    - name: logs
+      if: ${{ failure() }}
+      shell: bash
+      run: ./ci/github-actions/print_logs.sh
+    - name: build gem package
+      if: ${{ success() }}
+      shell: bash
+      run: ./ci/github-actions/export_build_osx.sh
+    - name: upload gem package
+      if: ${{ success() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: openstudio-server-gems-darwin-arm64
+        path: build/NREL/export/*.tar.gz
   docker:
     runs-on: ubuntu-24.04
     steps:
