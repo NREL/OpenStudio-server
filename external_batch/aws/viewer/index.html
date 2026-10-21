@@ -563,7 +563,8 @@
           <button class="tab-btn" data-tab="oscli">oscli_simulation.log</button>
         </div>
         <div class="modal-search-bar">
-          <input type="text" class="modal-search-input" id="logSearchInput" placeholder="Find in log... (Enter/Esc)" />
+          <input type="text" class="modal-search-input" id="logSearchInput" placeholder="Find in log... (Press Enter)" />
+          <button class="btn btn-secondary" id="logSearchBtn" style="padding: 4px 10px; font-size: 12px; font-weight: 600;">Find</button>
           <span id="logSearchMatchCount" style="font-size: 12px; color: var(--text-muted); min-width: 55px;"></span>
           <button class="btn btn-secondary btn-icon" id="logSearchPrev" title="Previous match (Shift+Enter)">▲</button>
           <button class="btn btn-secondary btn-icon" id="logSearchNext" title="Next match (Enter)">▼</button>
@@ -599,6 +600,7 @@
     const modalClose = document.getElementById('modalClose');
     const tabBtns = document.querySelectorAll('.tab-btn');
     const logSearchInput = document.getElementById('logSearchInput');
+    const logSearchBtn = document.getElementById('logSearchBtn');
     const logSearchMatchCount = document.getElementById('logSearchMatchCount');
     const logSearchPrev = document.getElementById('logSearchPrev');
     const logSearchNext = document.getElementById('logSearchNext');
@@ -858,29 +860,59 @@
         logSearchInput.value = '';
         logSearchMatchCount.textContent = '';
         filterLinesCheckbox.checked = false;
+        lastSearchQuery = '';
+        matchMarks = [];
+        currentMatchIndex = -1;
         viewer.textContent = currentRawLogText;
       } catch (err) {
         viewer.textContent = `Error reading file: ${err.message}`;
       }
     }
 
+    let lastSearchQuery = '';
+    let lastSearchFilterMode = false;
+    let matchMarks = [];
+
     function performLogSearch(direction = 0) {
       const query = logSearchInput.value.trim();
       const viewer = document.getElementById('logContent');
+      const isFilterMode = filterLinesCheckbox.checked;
 
       if (!query) {
         logSearchMatchCount.textContent = '';
         viewer.textContent = currentRawLogText;
         currentMatchIndex = -1;
+        lastSearchQuery = '';
+        matchMarks = [];
         return;
       }
 
-      if (filterLinesCheckbox.checked) {
+      // Fast path: if query & mode unchanged and we're navigating matches in highlight mode
+      if (query === lastSearchQuery && isFilterMode === lastSearchFilterMode && matchMarks.length > 0 && !isFilterMode) {
+        if (direction === 0) direction = 1; // Default Enter advances to next match
+        currentMatchIndex = (currentMatchIndex + direction + matchMarks.length) % matchMarks.length;
+        logSearchMatchCount.textContent = `${currentMatchIndex + 1} of ${matchMarks.length}`;
+        matchMarks.forEach((m, idx) => {
+          if (idx === currentMatchIndex) {
+            m.classList.add('active');
+            m.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } else {
+            m.classList.remove('active');
+          }
+        });
+        return;
+      }
+
+      lastSearchQuery = query;
+      lastSearchFilterMode = isFilterMode;
+
+      if (isFilterMode) {
         const lines = currentRawLogText.split('\n');
         const qLower = query.toLowerCase();
         const matchedLines = lines.filter(l => l.toLowerCase().includes(qLower));
         logSearchMatchCount.textContent = `${matchedLines.length} lines`;
         viewer.textContent = matchedLines.join('\n');
+        matchMarks = [];
         return;
       }
 
@@ -903,32 +935,31 @@
         logSearchMatchCount.textContent = '0 matches';
         viewer.textContent = currentRawLogText;
         currentMatchIndex = -1;
+        matchMarks = [];
         return;
       }
 
-      if (direction === 0) {
-        currentMatchIndex = 0;
-      } else if (direction > 0) {
-        currentMatchIndex = (currentMatchIndex + 1) % matchCount;
-      } else if (direction < 0) {
-        currentMatchIndex = (currentMatchIndex - 1 + matchCount) % matchCount;
-      }
-
-      logSearchMatchCount.textContent = `${currentMatchIndex + 1} of ${matchCount}`;
+      currentMatchIndex = 0;
+      logSearchMatchCount.textContent = `1 of ${matchCount}`;
       viewer.innerHTML = html;
 
-      const marks = viewer.querySelectorAll('mark.search-highlight');
-      if (marks[currentMatchIndex]) {
-        marks[currentMatchIndex].classList.add('active');
-        marks[currentMatchIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      matchMarks = Array.from(viewer.querySelectorAll('mark.search-highlight'));
+      if (matchMarks[0]) {
+        matchMarks[0].classList.add('active');
+        matchMarks[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
 
-    logSearchInput.addEventListener('input', () => performLogSearch(0));
+    logSearchBtn.addEventListener('click', () => {
+      const query = logSearchInput.value.trim();
+      performLogSearch(query === lastSearchQuery ? 1 : 0);
+    });
+
     logSearchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        performLogSearch(e.shiftKey ? -1 : 1);
+        const query = logSearchInput.value.trim();
+        performLogSearch(e.shiftKey ? -1 : (query === lastSearchQuery ? 1 : 0));
       } else if (e.key === 'Escape') {
         e.preventDefault();
         logSearchInput.value = '';
