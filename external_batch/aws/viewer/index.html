@@ -417,11 +417,34 @@
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 12px;
       line-height: 1.6;
-      white-space: pre-wrap;
-      word-break: break-all;
+      white-space: pre;
+      word-break: normal;
+      overflow-wrap: normal;
       flex: 1;
       min-height: 0;
       overflow-y: auto;
+      overflow-x: auto;
+    }
+
+    pre.log-viewer.wrap {
+      white-space: pre-wrap;
+      word-break: break-all;
+      overflow-wrap: anywhere;
+    }
+
+    pre.log-viewer::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    pre.log-viewer::-webkit-scrollbar-track {
+      background: #090d16;
+    }
+    pre.log-viewer::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    pre.log-viewer::-webkit-scrollbar-thumb:hover {
+      background: #475569;
     }
 
     .close-btn {
@@ -571,6 +594,7 @@
           <label style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; cursor: pointer; user-select: none;">
             <input type="checkbox" id="filterLinesCheckbox" /> Filter lines
           </label>
+          <button class="btn btn-secondary" id="wordWrapBtn" style="padding: 4px 10px; font-size: 12px; margin-left: 4px;" title="Toggle Word Wrap">Wrap: Off</button>
         </div>
       </div>
       <div class="modal-body">
@@ -605,6 +629,8 @@
     const logSearchPrev = document.getElementById('logSearchPrev');
     const logSearchNext = document.getElementById('logSearchNext');
     const filterLinesCheckbox = document.getElementById('filterLinesCheckbox');
+    const wordWrapBtn = document.getElementById('wordWrapBtn');
+    let isWordWrap = false;
 
     selectBtn.addEventListener('click', async () => {
       if (window.showDirectoryPicker) {
@@ -863,6 +889,7 @@
         lastSearchQuery = '';
         matchMarks = [];
         currentMatchIndex = -1;
+        viewer.classList.toggle('wrap', isWordWrap);
         viewer.textContent = currentRawLogText;
       } catch (err) {
         viewer.textContent = `Error reading file: ${err.message}`;
@@ -970,6 +997,25 @@
     logSearchNext.addEventListener('click', () => performLogSearch(1));
     logSearchPrev.addEventListener('click', () => performLogSearch(-1));
     filterLinesCheckbox.addEventListener('change', () => performLogSearch(0));
+
+    wordWrapBtn.addEventListener('click', () => {
+      isWordWrap = !isWordWrap;
+      const viewer = document.getElementById('logContent');
+      viewer.classList.toggle('wrap', isWordWrap);
+      if (isWordWrap) {
+        wordWrapBtn.textContent = 'Wrap: On';
+        wordWrapBtn.classList.remove('btn-secondary');
+        wordWrapBtn.style.backgroundColor = 'var(--primary)';
+        wordWrapBtn.style.color = '#0f172a';
+        wordWrapBtn.style.fontWeight = '600';
+      } else {
+        wordWrapBtn.textContent = 'Wrap: Off';
+        wordWrapBtn.classList.add('btn-secondary');
+        wordWrapBtn.style.backgroundColor = '';
+        wordWrapBtn.style.color = '';
+        wordWrapBtn.style.fontWeight = 'normal';
+      }
+    });
 
     searchInput.addEventListener('input', (e) => {
       searchQuery = e.target.value;
