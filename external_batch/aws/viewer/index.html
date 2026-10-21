@@ -300,33 +300,44 @@
       z-index: 1000;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 16px;
     }
 
     .modal {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: 12px;
-      width: 100%;
-      max-width: 950px;
-      max-height: 90vh;
+      width: 96vw;
+      max-width: 1350px;
+      height: 94vh;
+      max-height: 94vh;
       display: flex;
       flex-direction: column;
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
     }
 
     .modal-header {
-      padding: 16px 20px;
+      padding: 14px 20px;
       border-bottom: 1px solid var(--card-border);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .modal-tabs {
+    .modal-nav {
       display: flex;
+      justify-content: space-between;
+      align-items: center;
       border-bottom: 1px solid var(--card-border);
       background: #151e2e;
+      padding: 0 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .modal-tabs {
+      display: flex;
+      overflow-x: auto;
     }
 
     .tab-btn {
@@ -338,6 +349,7 @@
       font-size: 13px;
       font-weight: 600;
       border-bottom: 2px solid transparent;
+      white-space: nowrap;
     }
 
     .tab-btn.active {
@@ -346,10 +358,54 @@
       background: var(--card-bg);
     }
 
+    .modal-search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+    }
+
+    .modal-search-input {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      width: 260px;
+      outline: none;
+    }
+
+    .modal-search-input:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-icon {
+      padding: 4px 8px;
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    mark.search-highlight {
+      background-color: #f59e0b;
+      color: #0f172a;
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+
+    mark.search-highlight.active {
+      background-color: #38bdf8;
+      color: #0f172a;
+      outline: 2px solid #fff;
+    }
+
     .modal-body {
       padding: 16px;
-      overflow-y: auto;
       flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
     }
 
     pre.log-viewer {
@@ -363,7 +419,8 @@
       line-height: 1.6;
       white-space: pre-wrap;
       word-break: break-all;
-      max-height: 550px;
+      flex: 1;
+      min-height: 0;
       overflow-y: auto;
     }
 
@@ -497,12 +554,23 @@
         <h3 id="modalTitle">Datapoint Diagnostics</h3>
         <button class="close-btn" id="modalClose">&times;</button>
       </div>
-      <div class="modal-tabs">
-        <button class="tab-btn active" data-tab="status">status.json</button>
-        <button class="tab-btn" data-tab="runlog">run.log</button>
-        <button class="tab-btn" data-tab="out_osw">out.osw</button>
-        <button class="tab-btn" data-tab="measure_attrs">measure_attributes.json</button>
-        <button class="tab-btn" data-tab="oscli">oscli_simulation.log</button>
+      <div class="modal-nav">
+        <div class="modal-tabs">
+          <button class="tab-btn active" data-tab="status">status.json</button>
+          <button class="tab-btn" data-tab="runlog">run.log</button>
+          <button class="tab-btn" data-tab="out_osw">out.osw</button>
+          <button class="tab-btn" data-tab="measure_attrs">measure_attributes.json</button>
+          <button class="tab-btn" data-tab="oscli">oscli_simulation.log</button>
+        </div>
+        <div class="modal-search-bar">
+          <input type="text" class="modal-search-input" id="logSearchInput" placeholder="Find in log... (Enter/Esc)" />
+          <span id="logSearchMatchCount" style="font-size: 12px; color: var(--text-muted); min-width: 55px;"></span>
+          <button class="btn btn-secondary btn-icon" id="logSearchPrev" title="Previous match (Shift+Enter)">▲</button>
+          <button class="btn btn-secondary btn-icon" id="logSearchNext" title="Next match (Enter)">▼</button>
+          <label style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="filterLinesCheckbox" /> Filter lines
+          </label>
+        </div>
       </div>
       <div class="modal-body">
         <pre class="log-viewer" id="logContent">Loading...</pre>
@@ -519,6 +587,9 @@
     let currentSelectedDp = null;
     let activeTab = 'status';
 
+    let currentRawLogText = '';
+    let currentMatchIndex = -1;
+
     const selectBtn = document.getElementById('selectDirBtn');
     const folderInput = document.getElementById('folderInput');
     const refreshBtn = document.getElementById('refreshBtn');
@@ -527,6 +598,11 @@
     const modalOverlay = document.getElementById('modalOverlay');
     const modalClose = document.getElementById('modalClose');
     const tabBtns = document.querySelectorAll('.tab-btn');
+    const logSearchInput = document.getElementById('logSearchInput');
+    const logSearchMatchCount = document.getElementById('logSearchMatchCount');
+    const logSearchPrev = document.getElementById('logSearchPrev');
+    const logSearchNext = document.getElementById('logSearchNext');
+    const filterLinesCheckbox = document.getElementById('filterLinesCheckbox');
 
     selectBtn.addEventListener('click', async () => {
       if (window.showDirectoryPicker) {
@@ -772,20 +848,97 @@
 
       viewer.textContent = 'Reading file...';
       try {
-        const text = await file.text();
+        let text = await file.text();
         if (filename.endsWith('.json')) {
           try {
-            viewer.textContent = JSON.stringify(JSON.parse(text), null, 2);
-          } catch {
-            viewer.textContent = text;
-          }
-        } else {
-          viewer.textContent = text;
+            text = JSON.stringify(JSON.parse(text), null, 2);
+          } catch {}
         }
+        currentRawLogText = text;
+        logSearchInput.value = '';
+        logSearchMatchCount.textContent = '';
+        filterLinesCheckbox.checked = false;
+        viewer.textContent = currentRawLogText;
       } catch (err) {
         viewer.textContent = `Error reading file: ${err.message}`;
       }
     }
+
+    function performLogSearch(direction = 0) {
+      const query = logSearchInput.value.trim();
+      const viewer = document.getElementById('logContent');
+
+      if (!query) {
+        logSearchMatchCount.textContent = '';
+        viewer.textContent = currentRawLogText;
+        currentMatchIndex = -1;
+        return;
+      }
+
+      if (filterLinesCheckbox.checked) {
+        const lines = currentRawLogText.split('\n');
+        const qLower = query.toLowerCase();
+        const matchedLines = lines.filter(l => l.toLowerCase().includes(qLower));
+        logSearchMatchCount.textContent = `${matchedLines.length} lines`;
+        viewer.textContent = matchedLines.join('\n');
+        return;
+      }
+
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escapedQuery})`, 'gi');
+      const parts = currentRawLogText.split(regex);
+      let matchCount = 0;
+      let html = '';
+
+      for (let i = 0; i < parts.length; i++) {
+        if (parts[i].toLowerCase() === query.toLowerCase()) {
+          matchCount++;
+          html += `<mark class="search-highlight">${escapeHtml(parts[i])}</mark>`;
+        } else {
+          html += escapeHtml(parts[i]);
+        }
+      }
+
+      if (matchCount === 0) {
+        logSearchMatchCount.textContent = '0 matches';
+        viewer.textContent = currentRawLogText;
+        currentMatchIndex = -1;
+        return;
+      }
+
+      if (direction === 0) {
+        currentMatchIndex = 0;
+      } else if (direction > 0) {
+        currentMatchIndex = (currentMatchIndex + 1) % matchCount;
+      } else if (direction < 0) {
+        currentMatchIndex = (currentMatchIndex - 1 + matchCount) % matchCount;
+      }
+
+      logSearchMatchCount.textContent = `${currentMatchIndex + 1} of ${matchCount}`;
+      viewer.innerHTML = html;
+
+      const marks = viewer.querySelectorAll('mark.search-highlight');
+      if (marks[currentMatchIndex]) {
+        marks[currentMatchIndex].classList.add('active');
+        marks[currentMatchIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    logSearchInput.addEventListener('input', () => performLogSearch(0));
+    logSearchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        performLogSearch(e.shiftKey ? -1 : 1);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        logSearchInput.value = '';
+        performLogSearch(0);
+      }
+    });
+
+    logSearchNext.addEventListener('click', () => performLogSearch(1));
+    logSearchPrev.addEventListener('click', () => performLogSearch(-1));
+    filterLinesCheckbox.addEventListener('change', () => performLogSearch(0));
 
     searchInput.addEventListener('input', (e) => {
       searchQuery = e.target.value;
