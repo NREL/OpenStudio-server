@@ -3,8 +3,13 @@
 Runs external batch packages on AWS Batch array jobs. One array task = one
 chunk from `manifest.json`; the container pulls the package from S3, runs its
 chunk with the OpenStudio CLI, and pushes the finished result folders back to
-S3. On the server side, `sync_results.rb` mirrors S3 down so the normal ingest
-loop picks results up.
+S3.
+
+Two operational models are supported:
+- **Option A: Headless External Batch (Serverless CLI)**: Direct S3 + `submit_batch.rb` without MongoDB or Rails. Zero idle overhead, instant client detach, and viewable via the lightweight HTML dashboard (`viewer/index.html`).
+- **Option B: Cloud Head Node External Batch (Full Server)**: OpenStudio Server (mongod + Rails API/UI) hosted on an EC2 instance (`t3.large`/`c6i.xlarge`) provisioned via Terraform, coordinating AWS Batch workers.
+
+See [HEAD_VS_HEADLESS.md](HEAD_VS_HEADLESS.md) for a comprehensive architectural comparison, performance benchmarks, and deployment guidance.
 
 ## What the user must provide
 
@@ -60,6 +65,26 @@ ruby external_batch/aws/sync_results.rb <project>/temp_data/external_batch/analy
 Watch task states with `aws batch list-jobs --job-queue osaf-batch-queue
 --array-job-id <jobId>` or the AWS console; watch analysis progress in the
 normal server UI/status endpoints.
+
+## Lightweight Results Viewer
+
+For headless runs or quick local inspection, open `external_batch/aws/viewer/index.html` in any modern web browser. It is a single-file, zero-dependency dashboard that provides:
+- Real-time simulation progress bars (Succeeded / Failed / Queued).
+- Datapoint status table with search and filtering.
+- One-click modal diagnostics displaying `run.log`, `eplusout.err`, and `status.json`.
+
+Simply click **Select Results Directory** and point it to the local or synced results directory (`<batch_dir>/results` or `s3://<bucket>/runs/analysis_<id>/results`).
+
+## Provisioning the Cloud Head Node (Option B)
+
+To provision an optional EC2 head node alongside the AWS Batch compute environment:
+
+```bash
+cd external_batch/aws/infra
+terraform apply -var-file=nrel-846898690207.tfvars -var enable_head_node=true
+```
+
+The output will include `head_node_ui_url` (port 8080) for web browser access.
 
 ## Sizing / cost behavior
 

@@ -131,6 +131,18 @@ RSpec.describe 'ExternalBatch AWS helpers', type: :model do
         expect(dp.status_message).to eq 'completed normal'
         expect(dp.results['stub_measure']['ran']).to eq true
       end
+
+      # 5. headless CSV aggregation: verify aggregate_csv.rb produces expected CSV from results
+      aggregator_script = File.expand_path('../external_batch/demo/aggregate_csv.rb', Rails.root)
+      csv_out = File.join(batch_dir, 'results', 'aggregated_measure_attributes.csv')
+      ok = system(RbConfig.ruby, aggregator_script, File.join(batch_dir, 'results'), csv_out)
+      expect(ok).to be true
+      expect(File).to exist(csv_out)
+      rows = CSV.read(csv_out, headers: true)
+      expect(rows.size).to eq 2
+      expect(rows.headers).to include('datapoint_id', 'status', 'duration_seconds', 'stub_measure.ran')
+      expect(%w(Success completed)).to include(rows[0]['status'])
+      expect(rows[0]['stub_measure.ran']).to eq 'true'
     end
   end
 end
