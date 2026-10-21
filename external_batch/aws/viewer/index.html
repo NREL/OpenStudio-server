@@ -500,8 +500,9 @@
       <div class="modal-tabs">
         <button class="tab-btn active" data-tab="status">status.json</button>
         <button class="tab-btn" data-tab="runlog">run.log</button>
-        <button class="tab-btn" data-tab="eplusout">eplusout.err</button>
+        <button class="tab-btn" data-tab="out_osw">out.osw</button>
         <button class="tab-btn" data-tab="measure_attrs">measure_attributes.json</button>
+        <button class="tab-btn" data-tab="oscli">oscli_simulation.log</button>
       </div>
       <div class="modal-body">
         <pre class="log-viewer" id="logContent">Loading...</pre>
@@ -585,16 +586,15 @@
       const dpMap = new Map();
 
       for (const [path, file] of rawFiles.entries()) {
-        const parts = path.split('/');
-        // Format could be: [results, dp_id, filename] or [dp_id, filename]
-        let dpId = null;
-        let filename = parts[parts.length - 1];
+        const normalized = path.replace(/\\/g, '/');
+        const parts = normalized.split('/');
 
-        if (parts.length >= 2) {
-          dpId = parts[parts.length - 2];
-        }
+        // Strip leading 'results' or 'package' if present
+        let relParts = (parts[0] === 'results' || parts[0] === 'package') ? parts.slice(1) : parts;
+        if (relParts.length < 2) continue; // Skip root-level files like chunk_0.done or aggregated_measure_attributes.csv
 
-        if (!dpId || dpId === '.' || dpId === 'results' || dpId === 'package') continue;
+        const dpId = relParts[0]; // Datapoint folder name
+        const filename = parts[parts.length - 1];
 
         if (!dpMap.has(dpId)) {
           dpMap.set(dpId, {
@@ -607,6 +607,7 @@
           });
         }
         dpMap.get(dpId).files.set(filename, file);
+        dpMap.get(dpId).files.set(relParts.slice(1).join('/'), file);
       }
 
       // Parse status.json for each datapoint
@@ -617,9 +618,19 @@
           try {
             const text = await statusFile.text();
             const json = JSON.parse(text);
-            dp.status = json.status || 'unknown';
-            dp.host = json.host || 'aws-batch';
-            dp.error = json.error || (json.exit_code && json.exit_code !== 0 ? `Exit code ${json.exit_code}` : null);
+            const rawStatus = (json.completed_status || json.status || '').toLowerCase();
+            const exitStatus = (json.exit_status !== undefined) ? json.exit_status : json.exit_code;
+
+            if (rawStatus === 'success' || rawStatus === 'completed' || exitStatus === 0) {
+              dp.status = 'completed';
+            } else if (rawStatus === 'fail' || rawStatus === 'failed' || (exitStatus !== undefined && exitStatus !== 0)) {
+              dp.status = 'failed';
+              dp.error = json.error || `Exit status ${exitStatus}`;
+            } else {
+              dp.status = 'completed';
+            }
+
+            dp.host = json.hostname || json.host || 'aws-batch';
             if (json.started_at && json.completed_at) {
               const diffSec = Math.round((new Date(json.completed_at) - new Date(json.started_at)) / 1000);
               dp.duration = diffSec > 0 ? `${diffSec}s` : '<1s';
@@ -741,10 +752,19 @@
 
       let filename = 'status.json';
       if (tab === 'runlog') filename = 'run.log';
-      else if (tab === 'eplusout') filename = 'eplusout.err';
+      else if (tab === 'out_osw') filename = 'out.osw';
       else if (tab === 'measure_attrs') filename = 'measure_attributes.json';
+      else if (tab === 'oscli') filename = 'oscli_simulation.log';
 
-      const file = currentSelectedDp.files.get(filename);
+      let file = currentSelectedDp.files.get(filename);
+      if (!file) {
+        for (const [k, f] of currentSelectedDp.files.entries()) {
+          if (k.endsWith('/' + filename) || k === filename) {
+            file = f;
+            break;
+          }
+        }
+      }
       if (!file) {
         viewer.textContent = `[File not found: ${filename} for datapoint ${currentSelectedDp.id}]`;
         return;
