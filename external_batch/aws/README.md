@@ -6,7 +6,7 @@ chunk with the OpenStudio CLI, and pushes the finished result folders back to
 S3.
 
 Two operational models are supported:
-- **Option A: Headless External Batch (Serverless CLI)**: Direct S3 + `submit_batch.rb` without MongoDB or Rails. Zero idle overhead, instant client detach, and viewable via the lightweight HTML dashboard (`viewer/index.html`).
+- **Option A: Headless External Batch (Serverless CLI & Step Functions)**: Direct S3 + `submit_batch.rb` without MongoDB or Rails. Supports direct array submission or fire-and-forget orchestration via AWS Step Functions (`--step-functions`), zero idle overhead, instant client detach (< 13s), and viewable via the lightweight HTML dashboard (`viewer/index.html`).
 - **Option B: Cloud Head Node External Batch (Full Server)**: OpenStudio Server (mongod + Rails API/UI) hosted on an EC2 instance (`t3.large`/`c6i.xlarge`) provisioned via Terraform, coordinating AWS Batch workers.
 
 See [HEAD_VS_HEADLESS.md](HEAD_VS_HEADLESS.md) for a comprehensive architectural comparison, performance benchmarks, and deployment guidance.
@@ -54,12 +54,19 @@ ruby bin/openstudio_meta run_analysis -a lhs --batch-run-method external_batch_r
 # server packages to <project>/temp_data/external_batch/analysis_<id>
 
 # 3. push the package + submit the array job:
+# Option A (Direct Batch):
 ruby external_batch/aws/submit_batch.rb <project>/temp_data/external_batch/analysis_<id> \
     --bucket <bucket> --job-queue osaf-batch-queue --job-definition osaf-batch-runner
 
-# 4. mirror results down until all chunks are done (server ingests as they land):
+# Option A+ (Fire-and-Forget via Step Functions with Automated Post-Processing):
+ruby external_batch/aws/submit_batch.rb <project>/temp_data/external_batch/analysis_<id> \
+    --bucket <bucket> --job-queue osaf-batch-queue --job-definition osaf-batch-runner \
+    --step-functions arn:aws:states:<region>:<account>:stateMachine:osaf-batch-orchestrator
+
+# 4. For direct batch, mirror results down until all chunks are done (server ingests as they land):
 ruby external_batch/aws/sync_results.rb <project>/temp_data/external_batch/analysis_<id> \
     --s3-uri s3://<bucket>/runs/analysis_<id>
+# Note: In Step Functions mode, cloud-side finalization runs automatically in S3!
 ```
 
 Watch task states with `aws batch list-jobs --job-queue osaf-batch-queue
